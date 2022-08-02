@@ -17,6 +17,7 @@
 ''' Dashboard for  uploading and broadcasting honeyd config fileas to remote server and 
     show the live traffic of honeyd detections from the embedded device '''
 
+
 import flask
 import os
 import dash
@@ -53,21 +54,18 @@ csv_file=""
 
 
 ''' Default dummy config file '''
-fp = open("./data-log.csv","a+")
-fp.seek(0)
-i_data=fp.read()
-if len(i_data) == 0:
-    fp.write("TimeStamp,Protocol,Src_Ip,Dest_Ip,Src_Port,Dest_Port\n")
-fp.close()
-
-
-if len(conf_data) == 0:
+with open("./data-log.csv","a+") as fp:
+    fp.seek(0)
+    i_data=fp.read()
+    if len(i_data) == 0:
+        fp.write("TimeStamp,Protocol,Src_Ip,Dest_Ip,Src_Port,Dest_Port\n")
+if not conf_data:
     data = pd.read_csv(
         './data-log.csv'
     )
 else:
     conf_file=conf_data
-    csv_file="./"+conf_file
+    csv_file = f"./{conf_file}"
     data = pd.read_csv(
         csv_file
     )
@@ -92,7 +90,7 @@ def line_scatter(temp):
     l=[]
     m=[]
     dt = datetime.now()
-    
+
     timestamp = time.mktime(dt.timetuple()) + dt.microsecond / 1e6
     timestamp_h = timestamp - 60
     t_object = datetime.fromtimestamp(timestamp)
@@ -111,7 +109,7 @@ def line_scatter(temp):
 
     ''' Create DataFrame '''
     dz = pd.DataFrame(data)
-    
+
     ''' Data Formation for graph '''
     groups = dz.groupby(by=['Dest_Ip'])
     y=[]
@@ -121,8 +119,8 @@ def line_scatter(temp):
         e=[]
         r=[]
         t=0
-        ''' Picking last one minute live data ''' 
-        for p in range(0,12):
+        ''' Picking last one minute live data '''
+        for p in range(12):
             time_t=timestamp-t
             t=t+5
             timestamp_h = timestamp - t
@@ -136,7 +134,7 @@ def line_scatter(temp):
 
             e.append(p+1)
             r.append(a)
-        for q in range(0,12):
+        for q in range(12):
             y.append(i)
             z.append(e[q])
             c.append(r[q])
